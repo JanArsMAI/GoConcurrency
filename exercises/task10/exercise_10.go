@@ -1,6 +1,7 @@
-package exercises
+package main
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -23,25 +24,29 @@ import (
 //	...
 //}
 
+func worker(id int, jobs <-chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for job := range jobs {
+		fmt.Printf("Worker %d is processing number %d\n", id, job)
+	}
+}
+
 func main() {
 	const (
 		numJobs    = 20
-		numWorkers = 5
+		numWorkers = 3
 	)
 
-	//jobs := make(chan int)
+	jobs := make(chan int, numJobs)
 	var wg sync.WaitGroup
-
 	for i := 1; i <= numWorkers; i++ {
 		wg.Add(1)
-		//go worker(i, jobs, &wg)
+		go worker(i, jobs, &wg)
 	}
-
-	for j := 1; j <= numJobs; j++ {
-		// ...
+	for i := 1; i <= numJobs; i++ {
+		jobs <- i
 	}
+	close(jobs)
 
-	// ...
-
-	// ...
+	wg.Wait()
 }

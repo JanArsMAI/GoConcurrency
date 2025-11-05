@@ -1,7 +1,8 @@
-package exercises
+package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 // 1. Параллельный счётчик
@@ -12,15 +13,17 @@ import (
 // Важно: доступ к общей переменной должен быть потокобезопасным, чтобы избежать гонки данных.
 func main() {
 	counter := 0
-
-	// TODO: sync.Mutex для защиты counter
-	// TODO: sync.WaitGroup для ожидания завершения всех горутин
-
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
-		// TODO: Запустить горутину, которая увеличит counter
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			mu.Lock()
+			defer mu.Unlock()
+			counter++
+		}()
 	}
-
-	// TODO: Дождаться завершения всех горутин
-
+	wg.Wait()
 	fmt.Println("Result:", counter)
 }

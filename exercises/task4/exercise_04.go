@@ -1,4 +1,9 @@
-package exercises
+package main
+
+import (
+	"fmt"
+	"sync"
+)
 
 // 4. Передача данных по каналу
 // Задача:
@@ -10,20 +15,27 @@ package exercises
 //   - одна пишет числа в канал
 //   - вторая читает их и печатает
 
-func generator(ch chan int) {
-	// TODO: Отправить числа 1-5 в канал
-	// TODO: Закрыть канал
+func generator(ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := range 5 {
+		ch <- i + 1
+	}
+	close(ch)
 }
 
-func consumer(ch chan int) {
-	// TODO: Считать из канала и печатать числа
+func consumer(ch chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := range ch {
+		fmt.Println(i)
+	}
 }
 
 func main() {
 	ch := make(chan int)
-
-	go generator(ch)
-	go consumer(ch)
-
-	// TODO: Подождать завершения (через time.Sleep или sync.WaitGroup)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go generator(ch, &wg)
+	wg.Add(1)
+	go consumer(ch, &wg)
+	wg.Wait()
 }

@@ -1,7 +1,9 @@
-package exercises
+package main
 
 import (
 	"fmt"
+	"sync"
+	"sync/atomic"
 )
 
 // 2. Параллельный счётчик: Усложнение (atomic)
@@ -9,12 +11,16 @@ import (
 // В прошлой задаче мы использовали `sync.Mutex` для защиты общей переменной от гонки данных.
 // Теперь реши ту же задачу с помощью **пакета `sync/atomic`, без использования мьютекса.
 func main() {
-	counter := 0
-
+	var counter atomic.Int64
+	counter.Store(0)
+	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
-		// TODO использовать atomic
-		// TODO: Запустить горутину, которая увеличит counter
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			counter.Add(1)
+		}()
 	}
-
-	fmt.Println("Result:", counter)
+	wg.Wait()
+	fmt.Println("Result:", counter.Load())
 }

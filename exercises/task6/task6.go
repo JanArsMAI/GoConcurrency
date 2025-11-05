@@ -1,7 +1,8 @@
-package exercises
+package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
 
@@ -12,7 +13,13 @@ import (
 
 func worker(ctx context.Context) {
 	for {
-		// TODO ЛОГИКА
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			fmt.Println("tick")
+			time.Sleep(time.Second)
+		}
 	}
 }
 
